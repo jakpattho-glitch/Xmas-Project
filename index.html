@@ -202,28 +202,60 @@
             document.getElementById('custom-alert-overlay').style.display = 'none';
         }
 
-        // --- YouTube Setup (เพลงใหม่) ---
-        var ytPlayer;
-        var tag = document.createElement('script');
-        tag.src = "https://www.youtube.com/iframe_api";
-        document.head.appendChild(tag);
+        // --- 2. YouTube Setup (ปรับปรุงให้เสถียรขึ้น) ---
+var ytPlayer;
+var isPlayerReady = false;
 
-        function onYouTubeIframeAPIReady() {
-            ytPlayer = new YT.Player('player', {
-                height: '0', width: '0',
-                videoId: 'mXbmr6hoQPqVrE6s', // ลิงก์เพลงที่คุณแจ้ง
-                playerVars: { 'autoplay': 1, 'loop': 1, 'playlist': 'mXbmr6hoQPqVrE6s', 'controls': 0 },
-                events: { 'onReady': (e) => { e.target.mute(); e.target.playVideo(); } }
-            });
-        }
+// โหลด YouTube API
+var tag = document.createElement('script');
+tag.src = "https://www.youtube.com/iframe_api";
+var firstScriptTag = document.getElementsByTagName('script')[0];
+firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
 
-        function initExperience() {
-            document.getElementById('start-overlay').style.display = 'none';
-            showPage(1);
-            if (ytPlayer) {
-                ytPlayer.unMute(); ytPlayer.setVolume(70); ytPlayer.playVideo();
-            }
+function onYouTubeIframeAPIReady() {
+    ytPlayer = new YT.Player('player', {
+        height: '0',
+        width: '0',
+        videoId: 'yVhuo93Vkkg', // ใช้ ID เพลงที่คุณต้องการ
+        playerVars: { 
+            'autoplay': 1, 
+            'loop': 1, 
+            'playlist': 'yVhuo93Vkkg',
+            'controls': 0,
+            'mute': 1 // ต้องเริ่มด้วย Mute เพื่อให้ Browser ยอมให้ Autoplay
+        },
+        events: {
+            'onReady': onPlayerReady
         }
+    });
+}
+
+function onPlayerReady(event) {
+    isPlayerReady = true;
+    // เมื่อเพลงพร้อมแล้ว เปลี่ยนข้อความที่ปุ่มเริ่ม
+    const startP = document.querySelector('#start-overlay p');
+    if(startP) startP.innerText = "พร้อมแล้ว! แตะเพื่อเปิดของขวัญ 🔊";
+}
+
+function initExperience() {
+    if (!isPlayerReady) {
+        alert("กรุณารอสักครู่ เพลงกำลังโหลดจ้า...");
+        return;
+    }
+
+    // ซ่อนหน้ากากเริ่ม
+    document.getElementById('start-overlay').style.display = 'none';
+    showPage(1);
+
+    // เปิดเสียงและเล่นเพลงทันที (ต้องทำในฟังก์ชันที่เกิดจากการ Click ของผู้ใช้)
+    if (ytPlayer && typeof ytPlayer.unMute === 'function') {
+        ytPlayer.unMute();
+        ytPlayer.setVolume(80);
+        ytPlayer.playVideo();
+    }
+    
+    if (typeof animate === 'function') animate();
+}
 
         // --- Firebase Config ---
         const firebaseConfig = {
