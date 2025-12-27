@@ -3,199 +3,191 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Happy New Year 2026 - Wonderland 🎁</title>
+    <title>Happy New Year 2026 - Gift Wonderland 🎁</title>
     <link href="https://fonts.googleapis.com/css2?family=Mali:wght@400;700&display=swap" rel="stylesheet">
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
     
     <style>
         :root {
-            --soft-pink: #ffb6c1;
-            --sky-blue: #a1c4fd;
-            --grass-light: #55efc4;
-            --grass-dark: #00b894;
+            --primary-red: #ff4757;
+            --gold: #f9ca24;
+            --sky: #add8e6;
+            --grass-vibrant: #26de81;
         }
 
         body, html {
             margin: 0; padding: 0; width: 100%; height: 100%;
             font-family: 'Mali', cursive; overflow: hidden;
-            /* ท้องฟ้าพาสเทลสดใส */
-            background: linear-gradient(180deg, #c1dfc4 0%, #a1c4fd 40%, #ffc3a0 80%);
+            background: linear-gradient(180deg, #74b9ff 0%, #a1c4fd 100%);
         }
 
-        /* พระจันทร์ */
-        .moon {
-            position: fixed; top: 40px; right: 50px;
-            width: 80px; height: 80px;
-            background: #fffce0;
-            border-radius: 50%;
-            box-shadow: 0 0 40px 15px rgba(255, 255, 220, 0.5);
-            z-index: 0; /* อยู่หลังสุด */
+        /* --- Clouds (ก้อนเมฆลอย) --- */
+        .cloud {
+            position: fixed; background: white; width: 120px; height: 40px;
+            border-radius: 50px; opacity: 0.8; z-index: 1;
+            animation: floatCloud 20s linear infinite;
+        }
+        .cloud::after, .cloud::before {
+            content: ''; position: absolute; background: white; border-radius: 50%;
+        }
+        .cloud::after { width: 50px; height: 50px; top: -25px; left: 15px; }
+        .cloud::before { width: 40px; height: 40px; top: -15px; left: 55px; }
+
+        @keyframes floatCloud {
+            from { left: -150px; } to { left: 100%; }
         }
 
-        /* พื้นหญ้ามีมิติ */
+        /* --- Ground & Grass (พื้นหญ้า) --- */
         .ground {
-            position: fixed; bottom: 0; width: 100%; height: 22vh;
-            background: linear-gradient(180deg, var(--grass-light) 0%, var(--grass-dark) 100%);
-            z-index: 2; /* อยู่หน้าของขวัญยักษ์ แต่อยู่หลังการ์ด */
-            border-radius: 50% 50% 0 0 / 30px 30px 0 0; /* ทำขอบโค้งเหมือนเนินดิน */
-            box-shadow: 0 -10px 20px rgba(0,184,148,0.3);
+            position: fixed; bottom: 0; width: 100%; height: 18vh;
+            background: linear-gradient(to bottom, #26de81, #20bf6b);
+            z-index: 3; border-top: 5px solid #fff;
+        }
+        .grass-tuft {
+            position: absolute; bottom: 100%; color: #26de81;
+            font-size: 25px; animation: sway 3s ease-in-out infinite;
+            transform-origin: bottom; pointer-events: none;
+        }
+        @keyframes sway {
+            0%, 100% { transform: rotate(-5deg); } 50% { transform: rotate(5deg); }
         }
 
-        /* องค์ประกอบฉากหลังขนาดใหญ่ (Landscape Elements) */
-        .landscape-item {
-            position: fixed;
-            bottom: 15vh; /* วางอยู่บนเส้นขอบฟ้า */
-            z-index: 1; /* อยู่ระหว่างท้องฟ้ากับพื้นหญ้า */
-            filter: brightness(0.9) contrast(1.1); /* ปรับสีให้เข้มขึ้นนิดหน่อย */
-            user-select: none;
-            pointer-events: none;
+        /* --- Landscape Elements --- */
+        .giant-gift { position: fixed; bottom: 12vh; z-index: 2; filter: drop-shadow(0 10px 15px rgba(0,0,0,0.1)); }
+        
+        /* --- Custom Pop-up Modal --- */
+        #custom-popup {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.5); z-index: 2000;
+            display: none; justify-content: center; align-items: center;
+            backdrop-filter: blur(5px);
         }
-        .giant-gift-1 { left: -5%; font-size: 180px; transform: rotate(-10deg); }
-        .giant-gift-2 { right: 2%; font-size: 200px; transform: rotate(15deg); bottom: 12vh; }
-        .giant-tree { left: 25%; font-size: 250px; bottom: 14vh; opacity: 0.9; }
-        .giant-tree-2 { right: 30%; font-size: 150px; bottom: 18vh; opacity: 0.8; }
-
-        /* ของตกแต่งลอยฟ้ง (อันเดิม) */
-        .decoration {
-            position: fixed; z-index: 5; cursor: default;
-            filter: drop-shadow(0 5px 10px rgba(0,0,0,0.15));
-            user-select: none;
+        .popup-content {
+            background: white; border: 8px solid var(--gold);
+            padding: 30px; border-radius: 40px; text-align: center;
+            width: 80%; max-width: 320px;
+            animation: popUp 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
         }
-        .floating-gift { font-size: 35px; animation: float 6s infinite ease-in-out; opacity: 0.9; }
+        @keyframes popUp { from { transform: scale(0.7); opacity: 0; } to { transform: scale(1); opacity: 1; } }
 
-        @keyframes float {
-            0%, 100% { transform: translate(0, 0) rotate(0deg); }
-            50% { transform: translate(15px, -25px) rotate(15deg); }
-        }
-
-        canvas { position: fixed; top: 0; left: 0; z-index: 1; pointer-events: none; }
-
-        .container {
-            position: relative; z-index: 10; display: flex; /* z-index สูงสุด */
-            justify-content: center; align-items: center;
-            height: 100vh; width: 100%; padding: 20px; box-sizing: border-box;
-        }
-
-        /* หน้ากากกดเริ่ม */
-        #start-overlay {
-            position: fixed; top:0; left:0; width:100%; height:100%;
-            background: rgba(255, 182, 193, 0.95); z-index: 100;
-            display: flex; flex-direction: column; justify-content: center; align-items: center;
-            color: #d63031; text-align: center; cursor: pointer;
-        }
-
+        /* --- UI Components --- */
         .card {
-            background: rgba(255, 255, 255, 0.9);
-            backdrop-filter: blur(10px);
-            padding: 35px; border-radius: 45px;
-            width: 100%; max-width: 420px; text-align: center;
-            box-shadow: 0 15px 40px rgba(0,0,0,0.1);
-            border: 8px solid #fff;
+            background: rgba(255, 255, 255, 0.9); border: 8px solid var(--gold);
+            padding: 30px; border-radius: 50px; width: 90%; max-width: 380px;
+            text-align: center; z-index: 100; position: relative;
+            box-shadow: 0 15px 30px rgba(0,0,0,0.1);
+        }
+
+        .btn-main {
+            background: linear-gradient(to bottom, #ff7675, #d63031);
+            color: white; border: none; padding: 15px 30px; border-radius: 50px;
+            font-size: 1.2rem; font-weight: bold; cursor: pointer;
+            width: 100%; margin-top: 15px; font-family: 'Mali';
+            box-shadow: 0 5px 0 #b33939; transition: 0.2s;
+        }
+        .btn-main:active { transform: translateY(3px); box-shadow: 0 2px 0 #b33939; }
+
+        textarea {
+            width: 100%; height: 100px; border-radius: 20px; border: 2px solid #ddd;
+            padding: 15px; font-family: 'Mali'; font-size: 1rem; margin-top: 10px; box-sizing: border-box;
         }
 
         .hidden { display: none !important; }
-        h1 { color: #e84393; font-size: 3.5rem; margin: 0; text-shadow: 3px 3px white; }
-        .btn {
-            background: linear-gradient(45deg, #ff758c, #ff7eb3);
-            color: white; border: none; padding: 18px; border-radius: 30px;
-            font-size: 1.2rem; cursor: pointer; font-family: 'Mali'; font-weight: bold;
-            margin-top: 20px; width: 100%; transition: 0.3s;
-            box-shadow: 0 8px 20px rgba(255, 117, 140, 0.4);
-        }
-        .btn:hover { transform: translateY(-5px); }
-        .btn-gold { background: linear-gradient(45deg, #74b9ff, #a29bfe); box-shadow: 0 8px 20px rgba(116, 185, 255, 0.4); }
-        textarea {
-            width: 100%; height: 120px; border-radius: 25px; border: 3px solid #fab1a0;
-            padding: 20px; font-family: 'Mali'; font-size: 1.1rem; margin-top: 15px; box-sizing: border-box;
-        }
-        #randomResult {
-            background: white; color: #d63031; padding: 25px; border-radius: 25px;
-            margin: 20px 0; font-size: 1.4rem; border: 4px dashed #ff758c;
-        }
-        #yt-player-container { position: absolute; top: -999px; left: -999px; }
+
+        #yt-player { position: absolute; top: -1000px; }
     </style>
 </head>
 <body>
 
-    <div id="start-overlay" onclick="initExperience()">
-        <div style="font-size: 80px; animation: bounce 2s infinite;">🎉</div>
-        <h2 style="margin: 15px 0; font-size: 2rem;">แตะเพื่อเข้าสู่ดินแดนของขวัญ</h2>
-        <p style="font-size: 1.2rem;">(เปิดเสียงด้วยนะ! 🔊)</p>
+    <div id="custom-popup">
+        <div class="popup-content">
+            <div id="popup-icon" style="font-size: 50px; margin-bottom: 10px;">✨</div>
+            <h2 id="popup-title" style="margin: 0; color: var(--primary-red);">สำเร็จ!</h2>
+            <p id="popup-text">ส่งพรของคุณเรียบร้อยแล้ว</p>
+            <button class="btn-main" onclick="closePopup()">ตกลง 👌</button>
+        </div>
     </div>
 
-    <div id="yt-player-container"><div id="player"></div></div>
-    <canvas id="canvas"></canvas>
+    <div id="yt-player"></div>
 
-    <div class="moon"></div>
-    
-    <div class="landscape-item giant-gift-1">🎁</div>
-    <div class="landscape-item giant-tree">🎄</div>
-    <div class="landscape-item giant-tree-2">🌲</div>
-    <div class="landscape-item giant-gift-2">💝</div>
+    <div class="cloud" style="top: 10%; animation-duration: 25s;"></div>
+    <div class="cloud" style="top: 25%; animation-duration: 18s; animation-delay: -5s;"></div>
+    <div class="cloud" style="top: 15%; animation-duration: 30s; animation-delay: -10s;"></div>
 
-    <div class="ground"></div>
-    <div class="decoration floating-gift" style="top: 15%; left: 8%;">🎈</div>
-    <div class="decoration floating-gift" style="top: 35%; right: 12%; animation-delay: 1s;">✨</div>
-    <div class="decoration floating-gift" style="top: 60%; left: 15%; animation-delay: 2s; font-size: 25px;">🎁</div>
+    <div class="ground">
+        <div class="grass-tuft" style="left: 10%;">🌿</div>
+        <div class="grass-tuft" style="left: 25%; animation-delay: 0.5s;">🌱</div>
+        <div class="grass-tuft" style="left: 45%; animation-delay: 1.2s;">🌿</div>
+        <div class="grass-tuft" style="left: 70%; animation-delay: 0.8s;">🌱</div>
+        <div class="grass-tuft" style="left: 90%; animation-delay: 0.3s;">🌿</div>
+    </div>
 
-    <div class="container">
-        <div id="page1" class="card hidden">
-            <h1 style="font-size: 5rem; line-height: 1;">2026</h1>
-            <h3 style="color:#fd79a8; margin: 0 0 20px; font-size: 1.8rem;">Happy New Year</h3>
-            <p style="font-size: 1.2rem;">ยินดีต้อนรับสู่ปีแห่งความสุข!<br>มาส่งและรับพรกันเถอะ</p>
-            <div class="btn-group">
-                <button class="btn" onclick="showPage(2)">💖 เขียนคำอวยพร</button>
-                <button class="btn btn-gold" onclick="goToRandom()">🎁 สุ่มรับของขวัญ</button>
-            </div>
+    <div class="giant-gift" style="left: 5%; font-size: 120px;">🎁</div>
+    <div class="giant-gift" style="right: 5%; font-size: 100px; bottom: 10vh;">💝</div>
+
+    <div style="display: flex; justify-content: center; align-items: center; height: 100vh;">
+        <div id="page1" class="card">
+            <div style="font-size: 60px; animation: bounce 2s infinite;">🎅</div>
+            <h1 style="color: var(--primary-red); margin: 10px 0;">New Year 2026</h1>
+            <p>มาเขียนคำอวยพรใส่กล่องของขวัญ<br>และสุ่มรับพลังบวกจากเพื่อนกัน!</p>
+            <button class="btn-main" onclick="startAudioAndShow(2)">💖 เขียนคำอวยพร</button>
+            <button class="btn-main" style="background: var(--gold); box-shadow: 0 5px 0 #e1b12c;" onclick="startAudioAndShow(5)">🎁 สุ่มเปิดของขวัญ</button>
         </div>
 
         <div id="page2" class="card hidden">
-            <h1>ส่งความรัก 💌</h1>
-            <textarea id="wishInput" placeholder="ขอให้ปีหน้าเป็นปีที่ดีที่สุดของเธอ..."></textarea>
-            <button class="btn" onclick="sendWish()">ส่งขึ้นฟ้าเลย! 🚀</button>
-            <button onclick="showPage(1)" style="background:none; border:none; color:#999; margin-top:15px; cursor:pointer; font-size: 1.1rem;">กลับหน้าหลัก</button>
-        </div>
-
-        <div id="page5" class="card hidden">
-            <span style="font-size: 60px;">🌟</span>
-            <h1>พรที่คุณได้รับ</h1>
-            <div id="randomResult"></div>
-            <p style="font-size: 1rem; color: #ff758c;">เก็บภาพนี้ไว้เป็นกำลังใจนะ!</p>
-            <button class="btn" onclick="showPage(1)">เล่นอีกครั้ง ❤️</button>
+            <h2>เขียนพรของคุณ ✍️</h2>
+            <textarea id="wishInput" placeholder="อยากบอกอะไรในปี 2026 ดีนะ..."></textarea>
+            <button class="btn-main" onclick="sendWish()">ส่งของขวัญ 📮</button>
+            <p onclick="showPage(1)" style="cursor:pointer; color:#999; margin-top:15px;">⬅️ ย้อนกลับ</p>
         </div>
 
         <div id="page4" class="card hidden">
-            <div style="font-size: 70px; animation: float 2s infinite;">🎡</div>
-            <h2>กำลังหมุนวงล้อของขวัญ...</h2>
+            <div style="font-size: 70px; animation: bounce 0.5s infinite;">🎁</div>
+            <h2>กำลังค้นหากล่องของขวัญ...</h2>
+        </div>
+
+        <div id="page5" class="card hidden">
+            <div style="font-size: 50px;">🌟</div>
+            <h2 style="color: var(--primary-red);">พรที่คุณได้รับ...</h2>
+            <div id="randomResult" style="padding: 20px; border: 3px dashed var(--gold); border-radius: 20px; font-size: 1.2rem; margin: 15px 0; background: #fff;"></div>
+            <button class="btn-main" onclick="showPage(1)">กลับหน้าหลัก ❤️</button>
         </div>
     </div>
 
     <script>
-        // --- YouTube Setup (ระบบเดิมที่เสถียรแล้ว) ---
-        var ytPlayer;
+        // --- 1. Audio System (YouTube) ---
+        var player;
         var tag = document.createElement('script');
         tag.src = "https://www.youtube.com/iframe_api";
         document.head.appendChild(tag);
 
         function onYouTubeIframeAPIReady() {
-            ytPlayer = new YT.Player('player', {
+            player = new YT.Player('yt-player', {
                 height: '0', width: '0',
-                videoId: 'f_6vF0L7pS8', // เพลงเดิม
-                playerVars: { 'autoplay': 1, 'loop': 1, 'playlist': 'f_6vF0L7pS8', 'controls': 0 },
-                events: { 'onReady': (e) => { e.target.mute(); e.target.playVideo(); } }
+                videoId: 'f_6vF0L7pS8',
+                playerVars: { 'autoplay': 1, 'loop': 1, 'playlist': 'f_6vF0L7pS8' },
+                events: { 'onReady': (e) => e.target.mute() }
             });
         }
 
-        function initExperience() {
-            document.getElementById('start-overlay').style.display = 'none';
-            showPage(1);
-            if (ytPlayer) {
-                ytPlayer.unMute(); ytPlayer.setVolume(70); ytPlayer.playVideo();
-            }
+        function startAudioAndShow(num) {
+            if(player && player.unMute) { player.unMute(); player.playVideo(); }
+            showPage(num);
         }
 
-        // --- Firebase Config (ใช้ของเดิมได้เลยครับ) ---
+        // --- 2. Custom Popup Logic ---
+        function openPopup(title, text, icon = '✨') {
+            document.getElementById('popup-title').innerText = title;
+            document.getElementById('popup-text').innerText = text;
+            document.getElementById('popup-icon').innerText = icon;
+            document.getElementById('custom-popup').style.display = 'flex';
+        }
+        function closePopup() {
+            document.getElementById('custom-popup').style.display = 'none';
+        }
+
+        // --- 3. Firebase & Logic ---
         const firebaseConfig = {
             apiKey: "AIzaSyBRNyTPAtg-hzcYIrIXxIeDHo19rQrZOyo",
             authDomain: "cristmass.firebaseapp.com",
@@ -207,61 +199,33 @@
         firebase.initializeApp(firebaseConfig);
         const db = firebase.firestore();
 
-        // --- Logic ---
         function showPage(num) {
             document.querySelectorAll('.card').forEach(c => c.classList.add('hidden'));
             document.getElementById('page' + num).classList.remove('hidden');
+            if(num === 5) getRandomWish();
         }
 
         async function sendWish() {
-            let wish = document.getElementById('wishInput').value.trim();
-            if (!wish) return alert("อย่าลืมเขียนคำอวยพรนะ!");
-            await db.collection("wishes").add({ text: wish, timestamp: firebase.firestore.FieldValue.serverTimestamp() });
-            alert("ส่งคำอวยพรเรียบร้อยแล้ว! ✨");
+            const val = document.getElementById('wishInput').value.trim();
+            if(!val) return openPopup("อุ๊ปส์!", "กรุณาเขียนคำอวยพรด้วยนะจ๊ะ", "⚠️");
+            await db.collection("wishes").add({ text: val, time: Date.now() });
+            document.getElementById('wishInput').value = '';
+            openPopup("ส่งแล้ว!", "ของขวัญของคุณถูกวางไว้ใต้ต้นไม้แล้ว ✨", "🎁");
             showPage(1);
         }
 
-        async function goToRandom() {
+        async function getRandomWish() {
             showPage(4);
-            let pool = ["ขอให้ปี 2026 ใจดีกับคุณมากๆ นะ", "เตรียมตัวรับข่าวดีชิ้นใหญ่ได้เลย!", "สุขภาพแข็งแรง มีรอยยิ้มสดใสทุกวัน", "เงินทองไหลมาเทมา เพี้ยง!"];
+            let pool = ["ขอให้ปี 2026 เป็นปีที่รวยมาก!", "สุขภาพแข็งแรง ไม่เจ็บไม่ไข้นะ", "ขอให้พบรักที่ดีในปีใหม่นี้", "สมหวังในสิ่งที่ตั้งใจทุกประการ!"];
             try {
                 const snap = await db.collection("wishes").limit(50).get();
                 snap.forEach(doc => pool.push(doc.data().text));
             } catch(e){}
             setTimeout(() => {
-                document.getElementById('randomResult').innerText = `"${pool[Math.floor(Math.random()*pool.length)]}"`;
+                document.getElementById('randomResult').innerText = pool[Math.floor(Math.random() * pool.length)];
                 showPage(5);
-            }, 2000);
+            }, 1500);
         }
-
-        // --- Fireworks (ลดจำนวนลงเพื่อให้ไม่บังฉากหลัง) ---
-        const canvas = document.getElementById('canvas');
-        const ctx = canvas.getContext('2d');
-        let particles = [];
-        window.addEventListener('resize', () => { canvas.width = window.innerWidth; canvas.height = window.innerHeight; });
-        resize(); function resize() { canvas.width = window.innerWidth; canvas.height = window.innerHeight; }
-
-        class Particle {
-            constructor(x, y, color) {
-                this.x = x; this.y = y; this.color = color;
-                this.velocity = {x: (Math.random()-0.5)*5, y: (Math.random()-0.5)*5};
-                this.alpha = 1; this.decay = Math.random()*0.02 + 0.015;
-            }
-            draw() { ctx.globalAlpha = this.alpha; ctx.beginPath(); ctx.arc(this.x, this.y, 3, 0, Math.PI*2); ctx.fillStyle = this.color; ctx.fill(); }
-            update() { this.velocity.y += 0.05; this.x += this.velocity.x; this.y += this.velocity.y; this.alpha -= this.decay; }
-        }
-
-        function animate() {
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-            particles.forEach((p, i) => { p.update(); p.draw(); if(p.alpha<=0) particles.splice(i,1); });
-            if(Math.random() < 0.02) { // พลุน้อยลง
-                const x = Math.random()*canvas.width; const y = Math.random()*canvas.height*0.6;
-                const color = `hsl(${Math.random()*360}, 100%, 70%)`;
-                for(let i=0; i<30; i++) particles.push(new Particle(x, y, color));
-            }
-            requestAnimationFrame(animate);
-        }
-        animate();
     </script>
 </body>
 </html>
