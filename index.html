@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Xmas Miracle & Wishes 🎅🎄</title>
+    <link href="https://fonts.googleapis.com/css2?family=Mali:wght@400;700&display=swap" rel="stylesheet">
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+    
+    <style>
+        :root {
+            --xmas-red: #ff4d4d;
+            --xmas-gold: #ffd700;
+            --pastel-pink: #ffc2d1;
+            --card-bg: rgba(255, 255, 255, 0.9);
+            --text-main: #b30000;
+        }
+
+        body, html {
+            margin: 0; padding: 0; width: 100%; height: 100%;
+            font-family: 'Mali', cursive; overflow: hidden;
+            /* พื้นหลังแสงเหนือผสมโทนแดงชมพู */
+            background: linear-gradient(120deg, #ff9a9e, #fad0c4, #fbc2eb, #a18cd1, #ff4d4d);
+            background-size: 400% 400%;
+            animation: auroraSmooth 20s ease-in-out infinite alternate;
+        }
+
+        @keyframes auroraSmooth {
+            0% { background-position: 0% 50%; }
+            100% { background-position: 100% 50%; }
+        }
+
+        /* ต้นคริสต์มาสยักษ์ด้านหลัง */
+        .big-tree {
+            position: fixed; bottom: 5vh; left: -50px;
+            font-size: 350px; z-index: 1; opacity: 0.8;
+            filter: drop-shadow(0 0 20px rgba(255,215,0,0.5));
+            user-select: none;
+        }
+
+        /* ซานต้าบิน */
+        .santa-fly {
+            position: fixed; top: 15%; right: -200px;
+            font-size: 80px; z-index: 3;
+            animation: fly 15s linear infinite;
+            user-select: none;
+        }
+        @keyframes fly {
+            0% { transform: translateX(0) translateY(0) rotate(0); }
+            50% { transform: translateX(-60vw) translateY(-50px) rotate(-5deg); }
+            100% { transform: translateX(-120vw) translateY(0) rotate(0); }
+        }
+
+        /* เนินหิมะ */
+        .snow-hill {
+            position: fixed; bottom: -50px; left: 0; width: 100%; height: 30vh;
+            background: white; border-radius: 50% 50% 0 0 / 100% 100% 0 0;
+            box-shadow: 0 -10px 30px rgba(255, 255, 255, 0.8); z-index: 2;
+        }
+
+        .snow-container { position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 5; }
+        .snowflake { 
+            position: absolute; color: white; text-shadow: 0 0 5px rgba(255,255,255,0.9);
+            opacity: 0.8; animation: fall linear infinite; 
+        }
+        @keyframes fall { to { transform: translateY(110vh) rotate(360deg); } }
+
+        .container {
+            position: relative; z-index: 10; display: flex; justify-content: center; align-items: center;
+            height: 90vh; text-align: center;
+        }
+
+        .card {
+            background: var(--card-bg); backdrop-filter: blur(8px);
+            padding: 40px; border-radius: 40px; border: 5px solid var(--xmas-gold);
+            width: 85%; max-width: 450px; box-shadow: 0 20px 40px rgba(179, 0, 0, 0.2);
+        }
+
+        .hidden { display: none !important; }
+
+        h1 { font-size: 2.2rem; color: var(--text-main); text-shadow: 2px 2px 0px white; margin-bottom: 10px; }
+        p { font-size: 1.1rem; font-weight: bold; color: #444; }
+
+        textarea {
+            width: 100%; height: 120px; border-radius: 20px; border: 3px solid var(--xmas-red);
+            background: white; padding: 15px; font-family: 'Mali';
+            font-size: 1.1rem; color: #333; margin: 15px 0; outline: none; box-sizing: border-box;
+        }
+
+        .btn {
+            background: linear-gradient(135deg, #ff4d4d, #b30000); color: white; border: none;
+            padding: 15px 40px; border-radius: 50px; font-size: 1.4rem; cursor: pointer; transition: 0.3s; 
+            box-shadow: 0 5px 15px rgba(179, 0, 0, 0.4); font-family: 'Mali'; font-weight: bold;
+        }
+        .btn:hover { transform: scale(1.1) translateY(-5px); box-shadow: 0 10px 20px rgba(179, 0, 0, 0.6); }
+        .btn-secondary { background: white; color: var(--text-main); border: 2px solid var(--xmas-red); margin-top: 10px; }
+
+        #randomResult {
+            background: #fff5f5; color: var(--text-main); padding: 25px; border-radius: 25px;
+            margin: 20px 0; font-weight: bold; font-size: 1.5rem; border: 3px dashed var(--xmas-red);
+        }
+
+        #yt-player-container { position: absolute; top: -9999px; left: -9999px; }
+    </style>
+</head>
+<body>
+
+    <div class="big-tree">🎄</div>
+    <div class="santa-fly">🎅🏼🛷🦌</div>
+    <div class="snow-hill"></div>
+    <div class="snow-container" id="snowContainer"></div>
+    
+    <div id="yt-player-container"><div id="player"></div></div>
+
+    <div class="container">
+        <div id="page1" class="card">
+            <div style="font-size: 50px;">🤶🎁</div>
+            <h1>Merry Christmas!</h1>
+            <p>ส่งคำอธิษฐานของคุณขึ้นไปบนท้องฟ้า<br>และรับพรวิเศษจากเพื่อนๆ กันเถอะ!</p>
+            <button class="btn" onclick="startApp()">เริ่มส่งคำอธิษฐาน ✨</button>
+        </div>
+
+        <div id="page2" class="card hidden">
+            <h1>เขียนพรของคุณ 🌟</h1>
+            <textarea id="wishInput" placeholder="ปีใหม่นี้อยากให้คนอ่านเจอแต่เรื่องดีๆ..."></textarea>
+            <button class="btn" onclick="sendWish()">ส่งให้ซานต้า 💌</button>
+        </div>
+
+        <div id="page3" class="card hidden">
+            <h1>ส่งพรสำเร็จ! 🎉</h1>
+            <p>ตอนนี้คำอธิษฐานของคุณอยู่บนดาวแล้ว<br>ลองสุ่มพรที่เพื่อนคนอื่นส่งมาดูไหม?</p>
+            <button class="btn" onclick="goToRandom()">สุ่มคำอวยพร 😍</button>
+            <button class="btn btn-secondary" onclick="location.reload()">กลับหน้าหลัก</button>
+        </div>
+
+        <div id="page4" class="card hidden">
+            <div style="font-size: 100px; animation: wobble 1s infinite;">🎁</div>
+            <h1>กำลังแกะกล่องของขวัญ...</h1>
+            <p>ซานต้ากำลังเลือกคำอวยพรให้คุณ</p>
+        </div>
+
+        <div id="page5" class="card hidden">
+            <h1>พรที่คุณได้รับ 🎁</h1>
+            <div id="randomResult"></div>
+            <button class="btn" onclick="finish()">มีความสุขจัง ❤️</button>
+        </div>
+
+        <div id="lastPage" class="card hidden">
+            <div style="font-size: 60px;">🌟</div>
+            <h1>Happy Holidays!</h1>
+            <p id="endMessage"></p>
+            <button class="btn" style="margin-top: 20px;" onclick="location.reload()">เล่นอีกครั้ง</button>
+        </div>
+    </div>
+
+    <script>
+        // --- 1. Music Setup ---
+        var tag = document.createElement('script');
+        tag.src = "https://www.youtube.com/iframe_api";
+        var firstScriptTag = document.getElementsByTagName('script')[0];
+        firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
+
+        var ytPlayer;
+        function onYouTubeIframeAPIReady() {
+            ytPlayer = new YT.Player('player', {
+                height: '0', width: '0',
+                videoId: 'aRMatoEa9QQ',
+                playerVars: { 'autoplay': 0, 'controls': 0, 'loop': 1, 'playlist': 'aRMatoEa9QQ' }
+            });
+        }
+
+        // --- 2. Firebase Config (YOUR CONFIG) ---
+        const firebaseConfig = {
+            apiKey: "AIzaSyBRNyTPAtg-hzcYIrIXxIeDHo19rQrZOyo",
+            authDomain: "cristmass.firebaseapp.com",
+            projectId: "cristmass",
+            storageBucket: "cristmass.firebasestorage.app",
+            messagingSenderId: "1012428768624",
+            appId: "1:1012428768624:web:3292a209fe3b8ff7c6fbb5",
+            measurementId: "G-H1P6T33W9P"
+        };
+        
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
+
+        // --- 3. App Logic ---
+        function startApp() {
+            if (ytPlayer && ytPlayer.playVideo) ytPlayer.playVideo();
+            showPage(2);
+        }
+
+        function showPage(num) {
+            document.querySelectorAll('.card').forEach(c => c.classList.add('hidden'));
+            const pages = ['page1', 'page2', 'page3', 'page4', 'page5', 'lastPage'];
+            document.getElementById(pages[num-1]).classList.remove('hidden');
+        }
+
+        async function sendWish() {
+            let wish = document.getElementById('wishInput').value.trim();
+            if (!wish) return alert("เขียนอะไรสักหน่อยนะจ๊ะ...");
+            
+            await db.collection("wishes").add({
+                text: wish,
+                timestamp: firebase.firestore.FieldValue.serverTimestamp()
+            });
+            showPage(3);
+        }
+
+        const fallbackWishes = ["ขอให้ปีนี้เป็นปีที่ใจดีกับเธอนะ", "มีความสุขมากๆ นะคนเก่ง", "ขอให้ได้กินของอร่อยทุกวัน!"];
+
+        async function goToRandom() {
+            showPage(4);
+            setTimeout(async () => {
+                let pool = [...fallbackWishes];
+                try {
+                    const snap = await db.collection("wishes").orderBy("timestamp", "desc").limit(50).get();
+                    if (!snap.empty) {
+                        snap.forEach(doc => pool.push(doc.data().text));
+                    }
+                } catch (e) { console.error(e); }
+
+                const finalWish = pool[Math.floor(Math.random() * pool.length)];
+                document.getElementById('randomResult').innerText = `"${finalWish}"`;
+                showPage(5);
+            }, 2500); 
+        }
+
+        function finish() {
+            document.getElementById('endMessage').innerText = "ขอให้คำอธิษฐานของคุณ และพรที่ได้รับวันนี้ กลายเป็นจริงในเร็ววันนะ!";
+            showPage(6);
+        }
+
+        // หิมะตกช้าๆ
+        function createSnow() {
+            const container = document.getElementById('snowContainer');
+            for (let i = 0; i < 45; i++) {
+                const snow = document.createElement('div');
+                snow.className = 'snowflake';
+                snow.innerHTML = '❄';
+                snow.style.left = Math.random() * 100 + 'vw';
+                snow.style.fontSize = (Math.random() * 15 + 10) + 'px';
+                snow.style.animationDuration = (Math.random() * 10 + 12) + 's'; 
+                snow.style.animationDelay = Math.random() * 5 + 's';
+                container.appendChild(snow);
+            }
+        }
+        createSnow();
+    </script>
+</body>
+</html>
