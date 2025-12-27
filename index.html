@@ -3,44 +3,40 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Happy New Year 2026 🎆</title>
+    <title>Happy New Year 2026 - Celebration 🎆</title>
     <link href="https://fonts.googleapis.com/css2?family=Mali:wght@400;700&display=swap" rel="stylesheet">
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
     
     <style>
         :root {
-            --newyear-red: #d42426;
-            --newyear-gold: #ffd700;
-            --soft-pink: #ffc2d1;
-            --glass: rgba(255, 255, 255, 0.92);
+            --primary-pink: #ff007f;
+            --gold: #ffcf40;
+            --deep-purple: #2d004d;
+            --glass: rgba(255, 255, 255, 0.15);
         }
 
         body, html {
             margin: 0; padding: 0; width: 100%; height: 100%;
             font-family: 'Mali', cursive; overflow: hidden;
-            background: linear-gradient(135deg, #1a1a2e, #16213e, #b30000, #ff4d4d);
-            background-size: 400% 400%;
-            animation: auroraSmooth 15s ease infinite alternate;
+            background: linear-gradient(180deg, #12002b 0%, #3a005c 50%, #ff007f 100%);
         }
 
-        @keyframes auroraSmooth {
-            0% { background-position: 0% 50%; }
-            100% { background-position: 100% 50%; }
+        /* พื้นด้านล่างเพื่อมิติ */
+        .ground {
+            position: fixed; bottom: 0; width: 100%; height: 15vh;
+            background: linear-gradient(to top, rgba(0,0,0,0.5), transparent);
+            z-index: 2;
         }
 
-        /* ระบบพลุ (Fireworks) */
-        .firework {
-            position: fixed; font-size: 30px; z-index: 1;
-            bottom: -50px; pointer-events: none;
-            animation: shoot 4s ease-out forwards;
+        /* กล่องของขวัญตกแต่ง */
+        .gift-decoration {
+            position: fixed; bottom: 5vh; font-size: 100px; z-index: 3; filter: drop-shadow(0 0 10px gold);
         }
-        @keyframes shoot {
-            0% { left: 0; bottom: 0; transform: scale(0.5); opacity: 1; }
-            50% { left: 50vw; bottom: 60vh; transform: scale(1.2); opacity: 1; }
-            70% { opacity: 1; }
-            100% { left: 90vw; bottom: 80vh; transform: scale(2) rotate(20deg); opacity: 0; }
-        }
+        .gift-left { left: 5%; transform: rotate(-15deg); }
+        .gift-right { right: 5%; transform: rotate(15deg); }
+
+        canvas { position: fixed; top: 0; left: 0; z-index: 1; pointer-events: none; }
 
         .container {
             position: relative; z-index: 10; display: flex;
@@ -49,105 +45,100 @@
         }
 
         .card {
-            background: var(--glass); backdrop-filter: blur(10px);
-            padding: 30px; border-radius: 40px; border: 4px solid var(--newyear-gold);
-            width: 100%; max-width: 500px; text-align: center;
-            box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(15px);
+            padding: 40px 30px; border-radius: 40px;
+            width: 100%; max-width: 450px; text-align: center;
+            box-shadow: 0 25px 50px rgba(0,0,0,0.3);
+            border: 4px solid var(--gold);
         }
 
         .hidden { display: none !important; }
 
-        /* หน้าแรกแบบ 2 ฝั่ง */
-        .menu-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 25px; }
-        .menu-item {
-            padding: 20px 10px; border-radius: 25px; cursor: pointer;
-            transition: 0.3s; border: 2px solid transparent;
+        h1 { color: var(--primary-pink); font-size: 2.2rem; margin-bottom: 10px; }
+        p { color: #444; font-size: 1rem; line-height: 1.5; }
+
+        .btn-group { display: flex; flex-direction: column; gap: 15px; margin-top: 25px; }
+        
+        .btn {
+            background: linear-gradient(45deg, var(--primary-pink), #ff5e62);
+            color: white; border: none; padding: 15px; border-radius: 20px;
+            font-size: 1.2rem; cursor: pointer; font-family: 'Mali'; font-weight: bold;
+            transition: 0.3s; box-shadow: 0 5px 15px rgba(255, 0, 127, 0.3);
         }
-        .receive-box { background: #fff9e6; border-color: var(--newyear-gold); }
-        .send-box { background: #fff0f0; border-color: var(--newyear-red); }
-        .menu-item:hover { transform: translateY(-10px) scale(1.05); }
-
-        .envelope-icon { font-size: 50px; margin-bottom: 10px; display: block; }
-
-        h1 { color: var(--newyear-red); font-size: 1.8rem; margin-bottom: 5px; }
-        p { color: #555; font-size: 0.95rem; }
+        .btn:hover { transform: scale(1.05); }
+        .btn-gold { background: linear-gradient(45deg, #f1c40f, #e67e22); }
 
         textarea {
-            width: 100%; height: 100px; border-radius: 20px; border: 2px solid var(--newyear-red);
-            padding: 15px; font-family: 'Mali'; font-size: 1rem; margin: 15px 0; box-sizing: border-box;
-        }
-
-        .btn {
-            background: linear-gradient(135deg, #ff4d4d, #b30000); color: white;
-            border: none; padding: 12px 30px; border-radius: 50px; font-size: 1.2rem;
-            cursor: pointer; font-family: 'Mali'; font-weight: bold; width: 100%;
+            width: 100%; height: 120px; border-radius: 20px; border: 2px solid #ddd;
+            padding: 15px; font-family: 'Mali'; font-size: 1rem; margin-top: 20px; box-sizing: border-box;
         }
 
         #randomResult {
-            background: white; color: var(--newyear-red); padding: 20px; border-radius: 20px;
-            margin: 20px 0; font-weight: bold; font-size: 1.3rem; border: 3px dashed var(--newyear-gold);
+            background: #fff9e6; color: #333; padding: 25px; border-radius: 25px;
+            margin: 20px 0; font-size: 1.3rem; border: 2px solid var(--gold);
+            line-height: 1.6;
         }
-
-        /* หิมะ/กระดาษโปรย */
-        .confetti {
-            position: absolute; width: 10px; height: 10px; background: gold;
-            animation: fall linear infinite; z-index: 5;
-        }
-        @keyframes fall { to { transform: translateY(100vh) rotate(360deg); } }
 
         #yt-player-container { position: absolute; top: -9999px; left: -9999px; }
     </style>
 </head>
 <body>
 
-    <div id="confetti-container"></div>
     <div id="yt-player-container"><div id="player"></div></div>
+    <canvas id="fireworksCanvas"></canvas>
+    <div class="ground"></div>
+    <div class="gift-decoration gift-left">🎁</div>
+    <div class="gift-decoration gift-right">🎁</div>
 
     <div class="container">
         <div id="page1" class="card">
-            <h1 style="font-size: 2.5rem;">2026</h1>
-            <h2 style="color:var(--newyear-red); margin:0;">Happy New Year</h2>
-            <p>เฉลิมฉลองปีใหม่ด้วยการแบ่งปันความสุข!</p>
-            
-            <div class="menu-grid">
-                <div class="menu-item receive-box" onclick="startWithAction('receive')">
-                    <span class="envelope-icon">🧧</span>
-                    <strong>เปิดซองรับพร</strong>
-                    <p style="font-size:0.7rem;">รับพลังบวกปีหน้า</p>
-                </div>
-                <div class="menu-item send-box" onclick="startWithAction('send')">
-                    <span class="envelope-icon">✉️</span>
-                    <strong>เขียนคำอวยพร</strong>
-                    <p style="font-size:0.7rem;">ส่งต่อความหวังดี</p>
-                </div>
+            <h1 style="font-size: 3.5rem; margin: 0;">2026</h1>
+            <h2 style="color:#ff007f; margin-top: -10px;">Happy New Year</h2>
+            <p>เฉลิมฉลองค่ำคืนที่แสนพิเศษ<br>ด้วยการแลกเปลี่ยนความสุขให้กันและกัน</p>
+            <div class="btn-group">
+                <button class="btn" onclick="startApp('send')">✉️ เขียนคำอวยพรใหม่</button>
+                <button class="btn btn-gold" onclick="startApp('receive')">✨ เปิดกล่องรับคำอวยพร</button>
             </div>
-            <p style="margin-top:20px; font-size:0.8rem; color:#888;">คลิกเลือกอย่างใดอย่างหนึ่งเพื่อเริ่มเสียงเพลง</p>
         </div>
 
         <div id="page2" class="card hidden">
-            <h1>ส่งพรปีใหม่ของคุณ ✉️</h1>
-            <p>พรของคุณจะถูกใส่ซองสุ่มไปให้คนอื่น</p>
-            <textarea id="wishInput" placeholder="ขอให้ปี 2026 เป็นปีที่ใจดีกับเธอนะ..."></textarea>
-            <button class="btn" onclick="sendWish()">ส่งเข้าตู้ไปรษณีย์ปีใหม่ 📮</button>
-            <button onclick="showPage(1)" style="background:none; border:none; color:#888; margin-top:10px; cursor:pointer;">ย้อนกลับ</button>
+            <h1>ส่งต่อความรัก 💖</h1>
+            <p>คำอวยพรของคุณจะถูกส่งไปให้ใครบางคนสุ่มรับไป</p>
+            <textarea id="wishInput" placeholder="พิมพ์สิ่งดีๆ ที่คุณอยากบอกใครสักคน..."></textarea>
+            <div class="btn-group">
+                <button class="btn" onclick="sendWish()">ส่งเข้าตู้จดหมายปีใหม่ 📮</button>
+                <button onclick="showPage(1)" style="background:none; border:none; color:#999; cursor:pointer;">ย้อนกลับ</button>
+            </div>
+        </div>
+
+        <div id="page3" class="card hidden">
+            <div style="font-size: 60px;">💌</div>
+            <h1>ส่งสำเร็จแล้ว!</h1>
+            <p>ความปรารถนาดีของคุณกำลังเดินทางไปหาเพื่อนใหม่...<br>แล้วคุณล่ะ อยากรับพรสักข้อไหม?</p>
+            <div class="btn-group">
+                <button class="btn btn-gold" onclick="goToRandom()">🎁 เปิดของขวัญรับพรกลับบ้าง</button>
+                <button onclick="showPage(1)" style="background:none; border:none; color:#999; cursor:pointer;">กลับหน้าหลัก</button>
+            </div>
         </div>
 
         <div id="page4" class="card hidden">
-            <div style="font-size: 80px; animation: bounce 1s infinite;">🎊</div>
-            <h1>ซินเจียยู่อี่ ซินนี้ฮวดไช้</h1>
-            <p>กำลังเลือกซองจดหมายที่ดีที่สุดให้คุณ...</p>
+            <div style="font-size: 80px; animation: bounce 1s infinite;">🎇</div>
+            <h1>กำลังค้นหาพร...</h1>
+            <p>กำลังเลือกสิ่งดีๆ จากผู้คนมากมายมาให้คุณ</p>
         </div>
 
         <div id="page5" class="card hidden">
-            <span style="font-size:50px;">🧧</span>
-            <h1>พรปีใหม่ของคุณคือ...</h1>
+            <span style="font-size:50px;">🌟</span>
+            <h1>พรปีใหม่ของคุณ</h1>
             <div id="randomResult"></div>
-            <button class="btn" onclick="showPage(1)">รับทราบด้วยความสุข ❤️</button>
+            <p style="font-size:0.8rem; margin-bottom: 15px;">แคปหน้าจอนี้แชร์ลงสตอรี่เพื่อส่งต่อพลังบวก!</p>
+            <button class="btn" onclick="showPage(1)">เริ่มต้นใหม่ ❤️</button>
         </div>
     </div>
 
     <script>
-        // --- YouTube API ---
+        // --- YouTube API (เพลงใหม่) ---
         var tag = document.createElement('script');
         tag.src = "https://www.youtube.com/iframe_api";
         var firstScriptTag = document.getElementsByTagName('script')[0];
@@ -157,38 +148,40 @@
         function onYouTubeIframeAPIReady() {
             ytPlayer = new YT.Player('player', {
                 height: '0', width: '0',
-                videoId: 'aRMatoEa9QQ',
-                playerVars: { 'autoplay': 0, 'controls': 0, 'loop': 1, 'playlist': 'aRMatoEa9QQ' }
+                videoId: 'yVhuo93Vkkg', // เพลงที่ต้องการ
+                playerVars: { 'autoplay': 1, 'controls': 0, 'loop': 1, 'playlist': 'yVhuo93Vkkg' },
+                events: {
+                    'onReady': function(e) { e.target.mute(); e.target.playVideo(); } // Mute เพื่อให้ autoplay ทำงานได้บน Chrome
+                }
             });
         }
 
-        // --- Firebase Config ---
+        // --- Firebase Config (ใช้ของเดิม) ---
         const firebaseConfig = {
             apiKey: "AIzaSyBRNyTPAtg-hzcYIrIXxIeDHo19rQrZOyo",
             authDomain: "cristmass.firebaseapp.com",
             projectId: "cristmass",
             storageBucket: "cristmass.firebasestorage.app",
             messagingSenderId: "1012428768624",
-            appId: "1:1012428768624:web:3292a209fe3b8ff7c6fbb5",
-            measurementId: "G-H1P6T33W9P"
+            appId: "1:1012428768624:web:3292a209fe3b8ff7c6fbb5"
         };
         firebase.initializeApp(firebaseConfig);
         const db = firebase.firestore();
 
-        // --- Logic ---
-        function startWithAction(action) {
-            if (ytPlayer && ytPlayer.playVideo) ytPlayer.playVideo();
-            if (action === 'receive') {
-                goToRandom();
-            } else {
-                showPage(2);
+        // --- ระบบ Flow ---
+        function startApp(action) {
+            if (ytPlayer) {
+                ytPlayer.unMute();
+                ytPlayer.setVolume(50);
+                ytPlayer.playVideo();
             }
+            if (action === 'send') showPage(2);
+            else goToRandom();
         }
 
         function showPage(num) {
             document.querySelectorAll('.card').forEach(c => c.classList.add('hidden'));
-            const pages = ['page1', 'page2', 'page3', 'page4', 'page5'];
-            document.getElementById(pages[num-1]).classList.remove('hidden');
+            document.getElementById('page' + num).classList.remove('hidden');
         }
 
         async function sendWish() {
@@ -198,49 +191,68 @@
                 text: wish,
                 timestamp: firebase.firestore.FieldValue.serverTimestamp()
             });
-            alert("ส่งซองจดหมายของคุณเรียบร้อยแล้ว!");
-            showPage(1);
+            showPage(3); // ไปหน้าถามว่าจะรับพรต่อไหม
         }
 
         async function goToRandom() {
             showPage(4);
             setTimeout(async () => {
-                let pool = ["ขอให้ปี 2026 มีแต่รอยยิ้มนะ!", "เงินทองไหลมาเทมาตลอดปี!", "สุขภาพแข็งแรง ไม่เจ็บไม่ไข้"];
+                let pool = ["ขอให้ปี 2026 เป็นปีที่ใจดีที่สุดสำหรับคุณ", "มีเงินเก็บก้อนโต สุขภาพกายใจแข็งแรง!", "ขอให้ได้พบเจอแต่ความรักที่ดีและความสุขที่สดใส"];
                 try {
-                    const snap = await db.collection("wishes").limit(50).get();
+                    const snap = await db.collection("wishes").limit(100).get();
                     snap.forEach(doc => pool.push(doc.data().text));
                 } catch (e) { }
                 const finalWish = pool[Math.floor(Math.random() * pool.length)];
                 document.getElementById('randomResult').innerText = `"${finalWish}"`;
                 showPage(5);
-            }, 2000); 
+            }, 2500); 
         }
 
-        // สร้างพลุสุ่มวิ่ง
-        function launchFirework() {
-            const fw = document.createElement('div');
-            fw.className = 'firework';
-            const icons = ['🎆', '✨', '🎈', '🎊', '🎇'];
-            fw.innerHTML = icons[Math.floor(Math.random()*icons.length)];
-            document.body.appendChild(fw);
-            setTimeout(() => fw.remove(), 4000);
-        }
-        setInterval(launchFirework, 2000);
+        // --- Canvas Fireworks Engine ---
+        const canvas = document.getElementById('fireworksCanvas');
+        const ctx = canvas.getContext('2d');
+        let particles = [];
 
-        // สร้างกระดาษโปรย
-        function createConfetti() {
-            const container = document.getElementById('confetti-container');
-            for(let i=0; i<30; i++) {
-                const c = document.createElement('div');
-                c.className = 'confetti';
-                c.style.left = Math.random() * 100 + 'vw';
-                c.style.backgroundColor = ['#ffd700', '#ff4d4d', '#ffffff'][Math.floor(Math.random()*3)];
-                c.style.animationDuration = (Math.random() * 3 + 2) + 's';
-                c.style.opacity = Math.random();
-                container.appendChild(c);
+        function resize() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        }
+        window.addEventListener('resize', resize);
+        resize();
+
+        class Particle {
+            constructor(x, y, color) {
+                this.x = x; this.y = y; this.color = color;
+                this.velocity = { x: (Math.random() - 0.5) * 8, y: (Math.random() - 0.5) * 8 };
+                this.alpha = 1; this.friction = 0.95;
+            }
+            draw() {
+                ctx.globalAlpha = this.alpha;
+                ctx.beginPath(); ctx.arc(this.x, this.y, 2, 0, Math.PI * 2);
+                ctx.fillStyle = this.color; ctx.fill();
+            }
+            update() {
+                this.velocity.x *= this.friction; this.velocity.y *= this.friction;
+                this.y += this.velocity.y + 0.1; this.x += this.velocity.x;
+                this.alpha -= 0.01;
             }
         }
-        createConfetti();
+
+        function createFirework(x, y) {
+            const colors = ['#ff007f', '#ffcf40', '#00f2ff', '#ffffff'];
+            const color = colors[Math.floor(Math.random() * colors.length)];
+            for (let i = 0; i < 40; i++) particles.push(new Particle(x, y, color));
+        }
+
+        function animate() {
+            ctx.fillStyle = 'rgba(0, 0, 0, 0.15)';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            particles = particles.filter(p => p.alpha > 0);
+            particles.forEach(p => { p.update(); p.draw(); });
+            if (Math.random() < 0.05) createFirework(Math.random() * canvas.width, Math.random() * canvas.height * 0.7);
+            requestAnimationFrame(animate);
+        }
+        animate();
     </script>
 </body>
 </html>
